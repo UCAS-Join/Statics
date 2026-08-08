@@ -1,0 +1,2955 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description"
+        content="تقرير أثر بوت الاستقطاب والطلبة الجدد عبر واتساب - الكلية الجامعية للعلوم التطبيقية" />
+    <title>تقرير أثر بوت الاستقطاب والطلبة الجدد عبر واتساب - UCAS</title>
+
+    <!-- خط Cairo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+
+    <style>
+        /* ================================================================
+           CSS Variables (مستوحاة من تصميم UCAS)
+           ================================================================ */
+        :root {
+            --primary: #005baa;
+            --primary-light: #0077cc;
+            --primary-dark: #004080;
+            --accent: #62bb46;
+            --accent-light: #7bd45e;
+            --accent-dark: #4a9a35;
+            --bg: #f0f5fa;
+            --card-bg: rgba(255, 255, 255, 0.88);
+            --text: #1a1a2e;
+            --text-light: #4a5265;
+            --text-muted: #7a8295;
+            --gradient-start: #e8f0f8;
+            --gradient-end: #ffffff;
+            --whatsapp: #25D366;
+            --whatsapp-dark: #128C7E;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.14);
+            --radius: 18px;
+            --radius-sm: 12px;
+            --transition: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --border-color: rgba(0, 91, 170, 0.12);
+            --node-border: #005baa;
+            --node-bg: #ffffff;
+            --arrow-color: #62bb46;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0a0e17;
+            --card-bg: rgba(20, 30, 50, 0.95);
+            --text: #e8e8e8;
+            --text-light: #b0b0c0;
+            --text-muted: #8888a0;
+            --gradient-start: #1a1f2e;
+            --gradient-end: #0f141f;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --node-bg: rgba(20, 30, 50, 0.95);
+            --node-border: #62bb46;
+            --arrow-color: #75c04e;
+        }
+
+        /* ================================================================
+           Reset & Base
+           ================================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.4s ease, color 0.4s ease;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* خلفية متحركة */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-animation .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0.06;
+            animation: floatShape 22s infinite ease-in-out;
+        }
+
+        .bg-animation .shape:nth-child(1) {
+            width: 320px;
+            height: 320px;
+            top: 5%;
+            right: -80px;
+            animation-delay: 0s;
+        }
+
+        .bg-animation .shape:nth-child(2) {
+            width: 220px;
+            height: 220px;
+            top: 55%;
+            left: -60px;
+            animation-delay: 6s;
+            animation-duration: 26s;
+        }
+
+        .bg-animation .shape:nth-child(3) {
+            width: 170px;
+            height: 170px;
+            top: 25%;
+            left: 25%;
+            animation-delay: 12s;
+            animation-duration: 30s;
+        }
+
+        .bg-animation .shape:nth-child(4) {
+            width: 280px;
+            height: 280px;
+            bottom: 5%;
+            right: 15%;
+            animation-delay: 18s;
+            animation-duration: 24s;
+        }
+
+        @keyframes floatShape {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(60px, -60px) rotate(90deg);
+            }
+
+            50% {
+                transform: translate(0, -120px) rotate(180deg);
+            }
+
+            75% {
+                transform: translate(-60px, -60px) rotate(270deg);
+            }
+        }
+
+        /* شاشة التحميل */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .loader-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loader-container .loader-content {
+            text-align: center;
+            color: #fff;
+        }
+
+        .loader-container .loader-content .loader-icon {
+            font-size: 60px;
+            animation: pulseLoader 1.6s infinite;
+        }
+
+        .loader-container .loader-content .loader-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 16px;
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulseLoader {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.15);
+                opacity: 0.7;
+            }
+        }
+
+        /* شريط التقدم */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            z-index: 9998;
+            transition: width 0.08s ease;
+            box-shadow: 0 0 12px rgba(98, 187, 70, 0.4);
+        }
+
+        /* زر Dark Mode */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .dark-mode-toggle:hover {
+            transform: rotate(180deg) scale(1.1);
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* ================================================================
+           Cover / Header
+           ================================================================ */
+        .report-cover {
+            background: linear-gradient(145deg, var(--primary) 0%, var(--primary-dark) 70%, var(--primary-light) 100%);
+            color: #fff;
+            padding: 50px 30px 45px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .report-cover::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+            pointer-events: none;
+        }
+
+        .report-cover::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: rgba(98, 187, 70, 0.08);
+            pointer-events: none;
+        }
+
+        .report-cover .cover-badge {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 6px 28px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-cover .cover-icon {
+            font-size: 3.8rem;
+            margin-bottom: 8px;
+            display: block;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+        }
+
+        .report-cover h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            line-height: 1.3;
+        }
+
+        .report-cover .cover-subtitle {
+            font-size: 1.3rem;
+            font-weight: 400;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-cover .cover-org {
+            font-size: 1rem;
+            opacity: 0.7;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+            margin-top: 2px;
+        }
+
+        .report-cover .cover-line {
+            width: 70px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 4px;
+            margin: 14px auto 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-cover .cover-date {
+            margin-top: 22px;
+            font-size: 0.95rem;
+            opacity: 0.65;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding-top: 18px;
+            width: 180px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ================================================================
+           Content Wrapper
+           ================================================================ */
+        .report-content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 24px 50px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ================================================================
+           Section Headers
+           ================================================================ */
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .section-header .num {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 91, 170, 0.25);
+        }
+
+        .section-header h2 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--primary);
+            border-bottom: 4px solid var(--accent);
+            padding-bottom: 4px;
+            display: inline-block;
+            margin: 0;
+        }
+
+        .section-header h2 .highlight {
+            color: var(--accent);
+        }
+
+        /* ================================================================
+           Cards Grid (KPIs)
+           ================================================================ */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 18px 0 22px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 22px 18px;
+            border-radius: var(--radius);
+            text-align: center;
+            border-right: 5px solid var(--primary);
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
+        }
+
+        .stat-card .value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            display: block;
+            line-height: 1.2;
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 700;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .stat-card .sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .stat-card.green {
+            border-right-color: var(--accent);
+        }
+
+        .stat-card.green .value {
+            color: var(--accent);
+        }
+
+        .stat-card.gold {
+            border-right-color: #f5a623;
+        }
+
+        .stat-card.gold .value {
+            color: #f5a623;
+        }
+
+        /* دعم البطاقة الأرجوانية في الوضع الليلي */
+        [data-theme="dark"] .stat-card[style*="border-right-color: #8b5cf6;"] {
+            border-color: #a78bfa;
+        }
+
+        [data-theme="dark"] .stat-card[style*="border-right-color: #8b5cf6;"] .value {
+            color: #a78bfa;
+        }
+
+        /* ================================================================
+           Flowchart / Tree Diagram (محسّن)
+           ================================================================ */
+        .flowchart {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 28px 20px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin: 16px 0 24px;
+            overflow-x: auto;
+        }
+
+        .flowchart .tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 700px;
+            padding: 10px 0;
+        }
+
+        .flowchart .level {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 6px 0;
+            position: relative;
+            width: 100%;
+        }
+
+        .flowchart .node {
+            background: var(--node-bg);
+            border: 2px solid var(--node-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 20px;
+            text-align: center;
+            min-width: 140px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            flex-shrink: 0;
+        }
+
+        .flowchart .node:hover {
+            transform: translateY(-4px) scale(1.03);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-hover);
+            z-index: 2;
+        }
+
+        .flowchart .node .icon {
+            display: block;
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+
+        .flowchart .node .sub {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        .flowchart .node.start {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent-dark);
+            min-width: 220px;
+            font-size: 1.1rem;
+        }
+
+        .flowchart .node.start .sub {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .flowchart .node.branch-node {
+            border-width: 3px;
+            min-width: 160px;
+        }
+
+        /* ألوان العمادات */
+        .flowchart .node.engineering {
+            border-color: #f5a623;
+        }
+
+        .flowchart .node.engineering .icon {
+            color: #f5a623;
+        }
+
+        .flowchart .node.it {
+            border-color: #75c04e;
+        }
+
+        .flowchart .node.it .icon {
+            color: #75c04e;
+        }
+
+        .flowchart .node.nursing {
+            border-color: #0f62ac;
+        }
+
+        .flowchart .node.nursing .icon {
+            color: #0f62ac;
+        }
+
+        .flowchart .node.business {
+            border-color: #8b5cf6;
+        }
+
+        .flowchart .node.business .icon {
+            color: #8b5cf6;
+        }
+
+        .flowchart .node.humanities {
+            border-color: #ec4899;
+        }
+
+        .flowchart .node.humanities .icon {
+            color: #ec4899;
+        }
+
+        .flowchart .node.education {
+            border-color: #f59e0b;
+        }
+
+        .flowchart .node.education .icon {
+            color: #f59e0b;
+        }
+
+        .flowchart .node.diploma {
+            border-color: #6b7280;
+        }
+
+        .flowchart .node.diploma .icon {
+            color: #6b7280;
+        }
+
+        .flowchart .node.general {
+            border-color: #3b82f6;
+        }
+
+        .flowchart .node.general .icon {
+            color: #3b82f6;
+        }
+
+        .flowchart .node.mentor {
+            border-color: #f472b6;
+        }
+
+        .flowchart .node.mentor .icon {
+            color: #f472b6;
+        }
+
+        /* أسهم عمودية */
+        .flowchart .arrow-down {
+            font-size: 2rem;
+            color: var(--arrow-color);
+            text-align: center;
+            line-height: 1;
+            margin: 2px 0;
+            font-weight: 300;
+        }
+
+        .flowchart .arrow-down-small {
+            font-size: 1.3rem;
+            color: var(--arrow-color);
+            text-align: center;
+            line-height: 1;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        /* صف الأسهم مع تسميات */
+        .flowchart .arrow-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            font-size: 1.6rem;
+            color: var(--arrow-color);
+            margin: 2px 0;
+            width: 100%;
+        }
+
+        .flowchart .arrow-row span {
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .flowchart .arrow-row .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* حاوية فرعية للهندسة (تظهر كفرع واضح) */
+        .flowchart .engineering-subtree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin: 2px 0;
+            padding: 8px 0;
+            border-radius: var(--radius-sm);
+            background: rgba(245, 166, 35, 0.06);
+            border: 1px dashed rgba(245, 166, 35, 0.25);
+            position: relative;
+        }
+
+        .flowchart .engineering-subtree .subtree-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 6px;
+            padding: 2px 16px;
+            background: rgba(245, 166, 35, 0.1);
+            border-radius: 50px;
+            border: 1px solid rgba(245, 166, 35, 0.15);
+        }
+
+        .flowchart .engineering-subtree .subtree-level {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            width: 100%;
+            padding: 4px 0;
+        }
+
+        .flowchart .engineering-subtree .subtree-level .node {
+            min-width: 130px;
+            font-size: 0.85rem;
+            padding: 10px 14px;
+            border-color: #f5a623;
+        }
+
+        .flowchart .engineering-subtree .subtree-level .node .icon {
+            font-size: 1.4rem;
+        }
+
+        /* ملاحظة ختامية */
+        .flowchart .flow-note {
+            margin-top: 14px;
+            padding: 10px 18px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border-color);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            width: 100%;
+        }
+
+        .flowchart .flow-note i {
+            margin-left: 6px;
+        }
+
+        /* ================================================================
+           Tables
+           ================================================================ */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 16px 0 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            min-width: 580px;
+        }
+
+        thead th {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: #fff;
+            font-weight: 700;
+            padding: 14px 16px;
+            text-align: center;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            vertical-align: middle;
+            color: var(--text);
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover td {
+            background: rgba(0, 91, 170, 0.04);
+        }
+
+        [data-theme="dark"] tbody tr:hover td {
+            background: rgba(98, 187, 70, 0.06);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 14px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-high {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .badge-medium {
+            background: #fef3e2;
+            color: #b7791f;
+        }
+
+        .badge-low {
+            background: #e2f0e2;
+            color: #2f6b2f;
+        }
+
+        .badge-blue {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        [data-theme="dark"] .badge-high {
+            background: #3b1a1a;
+            color: #fca5a5;
+        }
+
+        [data-theme="dark"] .badge-medium {
+            background: #3b2a1a;
+            color: #fbbf24;
+        }
+
+        [data-theme="dark"] .badge-low {
+            background: #1a2a1a;
+            color: #86ef86;
+        }
+
+        [data-theme="dark"] .badge-blue {
+            background: var(--primary-light);
+            color: #fff;
+        }
+
+        .stars {
+            color: #f5a623;
+            letter-spacing: 2px;
+            font-size: 0.95rem;
+        }
+
+        /* ================================================================
+           Deanery Blocks
+           ================================================================ */
+        .deanery-block {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 24px 26px;
+            margin-bottom: 24px;
+            border-right: 6px solid var(--primary);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition);
+        }
+
+        .deanery-block:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-3px);
+        }
+
+        .deanery-block .dhead {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 8px;
+        }
+
+        .deanery-block .dhead h4 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .deanery-block .dhead .meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .deanery-block .dstats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 32px;
+            margin: 8px 0 14px;
+            font-size: 0.95rem;
+        }
+
+        .deanery-block .dstats span {
+            background: var(--bg);
+            padding: 4px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .deanery-block .dstats strong {
+            color: var(--primary);
+        }
+
+        .deanery-block .dstats .highlight-green {
+            color: var(--accent);
+        }
+
+        .mentor-list {
+            margin: 12px 0 8px;
+        }
+
+        .mentor-list .mentor-table-wrap {
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            background: var(--bg);
+        }
+
+        .mentor-list .mentor-table-wrap table {
+            min-width: 300px;
+            font-size: 0.9rem;
+        }
+
+        .mentor-list .mentor-table-wrap table td {
+            padding: 8px 14px;
+        }
+
+        .mentor-list .mentor-table-wrap table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+        }
+
+        /* تحسين المسافة في قائمة الأسئلة المتكررة */
+        .qa-list {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0;
+        }
+
+        .qa-list li {
+            padding: 5px 0 5px 30px;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 0.92rem;
+            position: relative;
+            color: var(--text);
+        }
+
+        .qa-list li::before {
+            content: '❓';
+            position: absolute;
+            right: -2px;
+            top: 5px;
+            font-size: 0.75rem;
+        }
+
+        .qa-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* ================================================================
+           Chart Container
+           ================================================================ */
+        .chart-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 20px 20px 10px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin: 16px 0 20px;
+        }
+
+        .chart-container canvas {
+            max-height: 300px;
+            max-width: 100%;
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 700px) {
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ================================================================
+           Note Box
+           ================================================================ */
+        .note-box {
+            background: #fefce8;
+            border-right: 6px solid #f5a623;
+            padding: 18px 24px;
+            border-radius: var(--radius-sm);
+            margin: 14px 0;
+            border: 1px solid #f5a62330;
+        }
+
+        [data-theme="dark"] .note-box {
+            background: rgba(245, 166, 35, 0.08);
+            border-color: #f5a62360;
+        }
+
+        .note-box strong {
+            color: #b7791f;
+        }
+
+        [data-theme="dark"] .note-box strong {
+            color: #fbbf24;
+        }
+
+        /* ================================================================
+           Recommendations Grid
+           ================================================================ */
+        .rec-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        .rec-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 20px 22px;
+            border-radius: var(--radius);
+            border-right: 4px solid var(--accent);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition);
+        }
+
+        .rec-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .rec-card .rtitle {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.05rem;
+        }
+
+        .rec-card .rpriority {
+            display: inline-block;
+            padding: 2px 14px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .rec-card .rpriority.high {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .rec-card .rpriority.medium {
+            background: #fef3e2;
+            color: #b7791f;
+        }
+
+        .rec-card .rpriority.low {
+            background: #e2f0e2;
+            color: #2f6b2f;
+        }
+
+        [data-theme="dark"] .rec-card .rpriority.high {
+            background: #3b1a1a;
+            color: #fca5a5;
+        }
+
+        [data-theme="dark"] .rec-card .rpriority.medium {
+            background: #3b2a1a;
+            color: #fbbf24;
+        }
+
+        [data-theme="dark"] .rec-card .rpriority.low {
+            background: #1a2a1a;
+            color: #86ef86;
+        }
+
+        .rec-card .rdesc {
+            font-size: 0.92rem;
+            color: var(--text-light);
+            margin: 4px 0;
+        }
+
+        .rec-card .rimpact {
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* ================================================================
+           Conclusion Box (محسّن)
+           ================================================================ */
+        .conclusion-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 24px 28px;
+            border-radius: var(--radius);
+            border-right: 6px solid var(--accent);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .conclusion-box .rating-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px 24px;
+            margin-bottom: 20px;
+        }
+
+        .conclusion-box .rating-grid .item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: var(--bg);
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .conclusion-box .rating-grid .item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--accent);
+        }
+
+        .conclusion-box .rating-grid .item .label {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
+            min-width: 120px;
+        }
+
+        .conclusion-box .rating-grid .item .stars {
+            font-size: 1rem;
+            letter-spacing: 1px;
+            color: #f5a623;
+        }
+
+        .conclusion-box .rating-grid .item .note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            background: var(--card-bg);
+            padding: 2px 12px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ================================================================
+           Footer
+           ================================================================ */
+        .report-footer {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            text-align: center;
+            padding: 32px 20px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+            animation: shimmer 4s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .report-footer p {
+            position: relative;
+            z-index: 1;
+            margin: 4px 0;
+            font-size: 1rem;
+        }
+
+        .report-footer .footer-copy {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            font-weight: 300;
+        }
+
+        /* ================================================================
+           Back to Top
+           ================================================================ */
+        .back-to-top {
+            position: fixed;
+            bottom: 28px;
+            left: 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(98, 187, 70, 0.35);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            z-index: 999;
+            border: none;
+            text-decoration: none;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-6px) scale(1.05);
+            box-shadow: 0 10px 32px rgba(98, 187, 70, 0.5);
+        }
+
+        /* ================================================================
+           Responsive
+           ================================================================ */
+        @media (max-width: 900px) {
+            .rec-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .report-cover h1 {
+                font-size: 2rem;
+            }
+
+            .report-cover .cover-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .section-header h2 {
+                font-size: 1.4rem;
+            }
+
+            .flowchart .level {
+                gap: 12px;
+            }
+
+            .flowchart .node {
+                min-width: 100px;
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+
+            .flowchart .node.start {
+                min-width: 160px;
+                font-size: 0.95rem;
+            }
+
+            .flowchart .arrow-row {
+                gap: 20px;
+                font-size: 1.3rem;
+            }
+
+            .flowchart .engineering-subtree .subtree-level {
+                gap: 12px;
+            }
+
+            .flowchart .engineering-subtree .subtree-level .node {
+                min-width: 100px;
+                font-size: 0.75rem;
+                padding: 8px 10px;
+            }
+
+            .flowchart .tree {
+                min-width: 500px;
+            }
+
+            .conclusion-box .rating-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .report-content {
+                padding: 20px 14px 40px;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+
+            .stat-card .value {
+                font-size: 1.6rem;
+            }
+
+            .report-cover {
+                padding: 35px 18px 30px;
+                min-height: 320px;
+            }
+
+            .report-cover h1 {
+                font-size: 1.6rem;
+            }
+
+            .report-cover .cover-icon {
+                font-size: 2.8rem;
+            }
+
+            .deanery-block {
+                padding: 18px 18px;
+            }
+
+            .deanery-block .dhead {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2px;
+            }
+
+            .deanery-block .dstats {
+                gap: 8px 16px;
+                font-size: 0.85rem;
+            }
+
+            .section-header .num {
+                width: 32px;
+                height: 32px;
+                font-size: 0.85rem;
+            }
+
+            .section-header h2 {
+                font-size: 1.2rem;
+            }
+
+            table {
+                font-size: 0.8rem;
+                min-width: 440px;
+            }
+
+            thead th,
+            tbody td {
+                padding: 8px 10px;
+            }
+
+            .back-to-top {
+                width: 44px;
+                height: 44px;
+                font-size: 17px;
+                bottom: 20px;
+                left: 20px;
+            }
+
+            .dark-mode-toggle {
+                width: 42px;
+                height: 42px;
+                font-size: 17px;
+                top: 14px;
+                left: 14px;
+            }
+
+            .rec-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+
+            .flowchart .tree {
+                min-width: 400px;
+            }
+
+            .flowchart .node {
+                min-width: 80px;
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
+
+            .flowchart .node.start {
+                min-width: 130px;
+                font-size: 0.85rem;
+            }
+
+            .flowchart .arrow-row {
+                gap: 12px;
+                font-size: 1.1rem;
+            }
+
+            .flowchart .engineering-subtree .subtree-level {
+                gap: 8px;
+            }
+
+            .flowchart .engineering-subtree .subtree-level .node {
+                min-width: 80px;
+                font-size: 0.65rem;
+                padding: 6px 8px;
+            }
+
+            .flowchart .engineering-subtree .subtree-level .node .icon {
+                font-size: 1.1rem;
+            }
+
+            .flowchart .arrow-down {
+                font-size: 1.5rem;
+            }
+
+            .conclusion-box .rating-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .conclusion-box .rating-grid .item .label {
+                min-width: 100px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-cover h1 {
+                font-size: 1.3rem;
+            }
+
+            .report-cover .cover-subtitle {
+                font-size: 1rem;
+            }
+
+            .report-cover .cover-org {
+                font-size: 0.85rem;
+            }
+
+            .stat-card .value {
+                font-size: 1.4rem;
+            }
+
+            .deanery-block .dstats span {
+                padding: 2px 12px;
+                font-size: 0.8rem;
+            }
+
+            .rec-card {
+                padding: 16px 16px;
+            }
+
+            .flowchart .tree {
+                min-width: 320px;
+            }
+
+            .conclusion-box .rating-grid .item {
+                padding: 8px 12px;
+            }
+
+            .conclusion-box .rating-grid .item .label {
+                min-width: 80px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* ================================================================
+           Utility
+           ================================================================ */
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .mt-8 {
+            margin-top: 8px;
+        }
+
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+
+        .fw-700 {
+            font-weight: 700;
+        }
+
+        .inline-flex {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .gap-4 {
+            gap: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================================================================
+    شاشة التحميل
+    ================================================================ -->
+    <div class="loader-container" id="loader">
+        <div class="loader-content">
+            <div class="loader-icon">🎓</div>
+            <div class="loader-text">جاري تحميل التقرير ...</div>
+        </div>
+    </div>
+
+    <!-- ================================================================
+    شريط التقدم
+    ================================================================ -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- ================================================================
+    خلفية متحركة
+    ================================================================ -->
+    <div class="bg-animation">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- ================================================================
+    زر Dark Mode
+    ================================================================ -->
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="تبديل الوضع الليلي">
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- ================================================================
+    COVER PAGE
+    ================================================================ -->
+    <header class="report-cover" id="top">
+        <span class="cover-badge">📊 تقرير تحليلي شامل</span>
+        <span class="cover-icon">🎓</span>
+        <h1>تقرير أثر بوت الاستقطاب والطلبة الجدد عبر واتساب</h1>
+        <div class="cover-line"></div>
+        <div class="cover-subtitle">الكلية الجامعية للعلوم التطبيقية &mdash; UCAS</div>
+        <div class="cover-org">وحدة الاستقطاب والعناية بالطلبة &bull; فريق المبرمجين</div>
+        <div class="cover-date">أغسطس 2026</div>
+    </header>
+
+    <!-- ================================================================
+    CONTENT
+    ================================================================ -->
+    <div class="report-content">
+
+        <!-- ============================================================
+        2. EXECUTIVE SUMMARY
+        ============================================================ -->
+        <section class="section" id="executive-summary">
+            <div class="section-header">
+                <span class="num">٢</span>
+                <h2>الملخص التنفيذي</h2>
+            </div>
+
+            <!-- شبكة البطاقات -->
+            <div class="card-grid">
+                <div class="stat-card">
+                    <span class="value">+12,500</span>
+                    <span class="label">إجمالي الرسائل المرسلة (API)</span>
+                </div>
+                <div class="stat-card gold">
+                    <span class="value">7,561</span>
+                    <span class="label">التفاعل مع البوت الآلي</span>
+                    <br>
+                    <span class="sub">(نقرات على أزرار وردود تلقائية)</span>
+                </div>
+                <div class="stat-card" style="border-right-color: #8b5cf6;">
+                    <span class="value" style="color: #8b5cf6;">1,044</span>
+                    <span class="label">الاستفسارات البشرية في المجموعات</span>
+                    <br>
+                    <span class="sub">(أسئلة نصية تم تحليلها يدوياً)</span>
+                </div>
+            </div>
+
+            <!-- فقرة الملخص التنفيذي -->
+            <div
+                style="background: var(--card-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); padding: 20px 26px; border-radius: var(--radius); border-right: 6px solid var(--primary); box-shadow: var(--shadow); border:1px solid var(--border-color);">
+                <p style="margin-bottom: 0; font-size: 1.05rem; color: var(--text);">
+                    يُظهر <strong>البوت الآلي</strong> أداءً تقنياً ممتازاً في التسليم (99.9%)، مما يؤكد استقرار البنية
+                    التحتية لـ WhatsApp Business API كقناة اتصال رئيسية. وقد سجل البوت تفاعلاً واسعاً من الطلبة، حيث
+                    بلغت <strong>التفاعلات الآلية</strong> (النقر على الأزرار والردود التلقائية) <strong>7,561</strong>
+                    تفاعلاً، مما يعكس حجم الإقبال على النظام الإلكتروني كبوابة دخول سريعة للمعلومات الأساسية.
+                    <br><br>
+                    في المقابل، كشفت <strong>مجموعات العمادات (التي يديرها المرشدون البشر)</strong> عن عمق أكبر في
+                    الاستفسارات، حيث تم تحليل <strong>1,044</strong> سؤالاً نصياً فريداً (شاملة المجموعة العامة)، تنوعت
+                    بين التفاصيل الدقيقة للرسوم، وشروط التجسير، والخطط الدراسية.
+                    <br><br>
+                    هذا التكامل بين <strong>السرعة الآلية للبوت</strong> و<strong>الخبرة البشرية للمرشدين</strong> يُبرز
+                    نجاح النموذج الهجين في عملية الاستقطاب؛ حيث يلبي البوت الاحتياجات الفورية والاستفسارات المتكررة،
+                    بينما يتفرغ المرشدون لحل الإشكاليات المعقدة، مما يسرع عملية اتخاذ القرار لدى الطلبة ويُقلل العبء
+                    الإداري على الفرق الإرشادية بشكل ملحوظ.
+                </p>
+            </div>
+
+            <!-- نموذج الهجين: آلية العمل -->
+            <div
+                style="background: var(--card-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); padding: 18px 24px; border-radius: var(--radius); border-right: 6px solid var(--accent); box-shadow: var(--shadow); border:1px solid var(--border-color); margin: 18px 0 24px;">
+                <p
+                    style="margin: 0; font-size: 1rem; color: var(--text); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <span
+                        style="background: var(--accent); color: #fff; padding: 2px 14px; border-radius: 50px; font-weight: 800; font-size: 0.85rem;">📌
+                        آلية العمل</span>
+                    <span>يبدأ الطالب رحلته باستقبال رسالة <strong>البوت الآلي</strong>، حيث يتفاعل مع الأسئلة السريعة
+                        والأزرار (مسجلاً <strong style="color:var(--accent);">7,561</strong> تفاعلاً). في حال كانت
+                        الأسئلة معقدة أو تحتاج تفصيلاً، يتم توجيه الطالب تلقائياً إلى <strong>مجموعات العمادات</strong>،
+                        حيث يتولى <strong>المرشدون البشر</strong> الرد على الاستفسارات النصية (والتي تم حصر <strong
+                            style="color:var(--primary);">1,044</strong> استفساراً فريداً منها في هذا التقرير، شاملة
+                        المجموعة العامة).</span>
+                </p>
+            </div>
+
+            <!-- خريطة التدفق -->
+            <div class="flowchart">
+                <h4
+                    style="text-align:center; color:var(--primary); font-weight:800; margin-bottom:16px; font-size:1.2rem;">
+                    <i class="fa-solid fa-sitemap" style="margin-left:8px;"></i>
+                    رحلة الطالب من البوت إلى المجموعات أو المرشدين
+                </h4>
+                <div class="tree">
+
+                    <div class="level">
+                        <div class="node start">
+                            <span class="icon">🤖</span>
+                            دخول الطالب للبوت
+                            <span class="sub">(رسالة ترحيب + صورة المفاتيح)</span>
+                        </div>
+                    </div>
+
+                    <div class="arrow-down">⬇</div>
+
+                    <div class="level">
+                        <div class="node general" style="border-width:3px; min-width:180px;">
+                            <span class="icon">📋</span>
+                            قائمة العمادات
+                            <span class="sub">(اختيار العمادة)</span>
+                        </div>
+                    </div>
+
+                    <div class="arrow-down">⬇</div>
+
+                    <div class="level" style="gap:14px; flex-wrap:wrap;">
+                        <div class="node engineering branch-node">
+                            <span class="icon">🏗️</span>
+                            الهندسة
+                            <span class="sub">(3 أقسام فرعية)</span>
+                        </div>
+                        <div class="node business branch-node">
+                            <span class="icon">💰</span>
+                            إدارة الأعمال
+                        </div>
+                        <div class="node nursing branch-node">
+                            <span class="icon">🏥</span>
+                            التمريض والصحة
+                        </div>
+                        <div class="node it branch-node">
+                            <span class="icon">💻</span>
+                            تكنولوجيا المعلومات
+                        </div>
+                        <div class="node education branch-node">
+                            <span class="icon">📚</span>
+                            التربية
+                        </div>
+                        <div class="node humanities branch-node">
+                            <span class="icon">📡</span>
+                            الإنسانية والإعلام
+                        </div>
+                        <div class="node diploma branch-node">
+                            <span class="icon">🎓</span>
+                            الدبلوم المهني
+                        </div>
+                        <div class="node general branch-node">
+                            <span class="icon">🌟</span>
+                            الإرشاد العام
+                        </div>
+                    </div>
+
+                    <div class="arrow-row" style="gap:20px; margin:4px 0;">
+                        <span style="min-width:80px;"></span>
+                        <span style="min-width:80px; font-size:0.85rem; color:var(--text-muted);">
+                            <i class="fa-solid fa-arrow-down"
+                                style="display:block; font-size:1.4rem; color:var(--arrow-color);"></i>
+                            اختيار التخصص داخل الهندسة
+                        </span>
+                        <span style="min-width:80px;"></span>
+                    </div>
+
+                    <div class="engineering-subtree">
+                        <span class="subtree-label">🏗️ فروع عمادة الهندسة</span>
+                        <div class="subtree-level">
+                            <div class="node" style="border-color:#f5a623;">
+                                <span class="icon">🏛️</span>
+                                العمارة والفنون
+                                <span class="sub">(معمارية، ديكور، تصميم)</span>
+                            </div>
+                            <div class="node" style="border-color:#f5a623;">
+                                <span class="icon">📐</span>
+                                المدنية والجيوماتكس
+                                <span class="sub">(تشييد، مساحة، نظم معلومات)</span>
+                            </div>
+                            <div class="node" style="border-color:#f5a623;">
+                                <span class="icon">⚙️</span>
+                                حاسوب وإلكترونيات
+                                <span class="sub">(أمن، شبكات، ذكاء اصطناعي، طاقة)</span>
+                            </div>
+                        </div>
+                        <div style="font-size:1.2rem; color:var(--arrow-color); margin:2px 0;">⬇</div>
+                        <div class="subtree-level" style="gap:30px; padding-top:2px;">
+                            <div
+                                style="font-size:0.75rem; color:var(--text-muted); display:flex; align-items:center; gap:6px;">
+                                <span>👥</span> رابط مجموعة العمادة
+                            </div>
+                            <div
+                                style="font-size:0.75rem; color:var(--text-muted); display:flex; align-items:center; gap:6px;">
+                                <span>🧑‍🏫</span> التواصل مع مرشد
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="arrow-down" style="margin:6px 0 2px;">⬇</div>
+                    <div class="level" style="gap:40px; flex-wrap:wrap; margin-top:4px;">
+                        <div class="node"
+                            style="border-color:var(--accent); min-width:180px; background:rgba(98,187,70,0.06);">
+                            <span class="icon">👥</span>
+                            رابط مجموعة العمادة
+                            <span class="sub">(انضمام للمجموعة الإرشادية)</span>
+                        </div>
+                        <div class="node mentor" style="min-width:180px; background:rgba(244,114,182,0.06);">
+                            <span class="icon">🧑‍🏫</span>
+                            التواصل مع مرشد
+                            <span class="sub">(رقم واتساب المرشد المختص)</span>
+                        </div>
+                    </div>
+
+                    <div class="flow-note">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        في حال اختيار "الإرشاد العام" أو "المرشد العام" يتم توجيه الطالب إلى المجموعة العامة
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ============================================================
+        3. DAILY STATISTICS
+        ============================================================ -->
+        <section class="section" id="daily-stats">
+            <div class="section-header">
+                <span class="num">٣</span>
+                <h2>الإحصائيات اليومية</h2>
+            </div>
+            <p style="color: var(--text-muted); font-weight: 600; margin-bottom: 10px;">
+                الفترة: 23 يوليو – 5 أغسطس 2026
+            </p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المؤشر</th>
+                            <th>القيمة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>إجمالي الرسائل في الفترة</td>
+                            <td><strong>+12,500</strong> رسالة</td>
+                        </tr>
+                        <tr>
+                            <td>المتوسط اليومي</td>
+                            <td><strong>+484</strong> رسالة/يومياً</td>
+                        </tr>
+                        <tr>
+                            <td>أعلى يوم</td>
+                            <td><strong>+1,600</strong> (31 يوليو)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        4. DEANERY ANALYSIS
+        ============================================================ -->
+        <section class="section" id="deanery-analysis">
+            <div class="section-header">
+                <span class="num">٤</span>
+                <h2>تحليل العمادات</h2>
+            </div>
+
+            <div
+                style="background: #fefce8; border-right: 6px solid #f5a623; padding: 12px 20px; border-radius: var(--radius-sm); margin-bottom: 20px; border: 1px solid #f5a62330; display: flex; align-items: flex-start; gap: 10px;">
+                <span style="font-size: 1.4rem;">⚠️</span>
+                <div>
+                    <strong style="color: #b7791f;">تنويه هام:</strong>
+                    <span style="color: var(--text-light); font-size: 0.95rem;">الأرقام والجداول الواردة في هذا القسم
+                        (تحليل العمادات) تمثل <strong>الاستفسارات النصية البشرية</strong> التي دارت في مجموعات الواتساب
+                        (شاملة المجموعة العامة)، والتي تم حصرها يدوياً من ملفات المحادثة. وهي <strong>لا تشمل</strong>
+                        التفاعلات الآلية السريعة (نقر الأزرار) مع البوت، والتي وردت في البطاقات السابقة.</span>
+                </div>
+            </div>
+
+            <h3 style="margin-top:0; font-weight:800; color:var(--primary);">4.1 ترتيب العمادات حسب حجم الاستفسارات</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الترتيب</th>
+                            <th>العمادة</th>
+                            <th>عدد الاستفسارات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>عمادة الهندسة والنظم الذكية</td>
+                            <td>278</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>عمادة إدارة المال والأعمال</td>
+                            <td>254</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>عمادة التمريض وعلوم الصحة</td>
+                            <td>211</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>عمادة تكنولوجيا المعلومات</td>
+                            <td>132</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>عمادة التربية</td>
+                            <td>66</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>عمادة العلوم الإنسانية والإعلام</td>
+                            <td>53</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>عمادة الدبلوم المهني والتعليم المستمر</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>المجموع الكلي</strong></td>
+                            <td><strong>1,044</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top:24px; font-weight:800; color:var(--primary);">توزيع الاستفسارات حسب العمادة</h3>
+            <div class="chart-row">
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <h3 style="margin-top:30px; font-weight:800; color:var(--primary);">4.2 تحليل مفصل لكل عمادة</h3>
+
+            <!-- ===== Nursing ===== -->
+            <div class="deanery-block" style="border-right-color: #0f62ac;">
+                <div class="dhead">
+                    <h4>🏥 عمادة التمريض وعلوم الصحة</h4>
+                    <span class="meta">عدد الاستفسارات: 211</span>
+                </div>
+                <div class="dstats">
+                    <span>✅ تم الرد: <strong>182</strong> (86.3%)</span>
+                    <span>⏱ متوسط سرعة الرد: <strong>28 دقيقة</strong></span>
+                    <span>👥 مرشدون نشطون: <strong>5+</strong></span>
+                </div>
+                <div class="mentor-list">
+                    <p style="font-weight:700; margin: 6px 0 4px; color:var(--text);">أبرز المرشدين والسفراء:</p>
+                    <div class="mentor-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الرتبة</th>
+                                    <th>الاسم (الرقم)</th>
+                                    <th>الردود</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>جنان قديح (+970 598 350 183)</td>
+                                    <td>66</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>مجد (+970 592 117 798)</td>
+                                    <td>45</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>أماني جابر عامر (+972 59-759-6386)</td>
+                                    <td>37</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p style="font-weight:700; margin: 8px 0 2px; color:var(--text);">أبرز 5 أسئلة متكررة:</p>
+                    <ul class="qa-list">
+                        <li>"كم سعر الساعة؟"</li>
+                        <li>"متى يبدأ الفصل؟"</li>
+                        <li>"كيف أدفع 50 دينار؟"</li>
+                        <li>"هل فيه منحة؟"</li>
+                        <li>"كيف أسجل؟"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== Engineering ===== -->
+            <div class="deanery-block" style="border-right-color: #f5a623;">
+                <div class="dhead">
+                    <h4>🏗️ عمادة الهندسة والنظم الذكية</h4>
+                    <span class="meta">عدد الاستفسارات: 278</span>
+                </div>
+                <div class="dstats">
+                    <span>✅ تم الرد: <strong>209</strong> (75.2%)</span>
+                    <span>⏱ متوسط سرعة الرد: <strong>25 دقيقة و 37 ثانية</strong></span>
+                    <span>👥 مرشدون نشطون: <strong>4+</strong></span>
+                </div>
+                <div class="mentor-list">
+                    <p style="font-weight:700; margin: 6px 0 4px; color:var(--text);">أبرز المرشدين والسفراء:</p>
+                    <div class="mentor-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الرتبة</th>
+                                    <th>الاسم (الرقم)</th>
+                                    <th>الردود</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Mahmoud Khalil</td>
+                                    <td>47</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Ibrahim Almeshal</td>
+                                    <td>42</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Eng Amro Qarmout</td>
+                                    <td>30</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p style="font-weight:700; margin: 8px 0 2px; color:var(--text);">أبرز 5 مواضيع مطروحة:</p>
+                    <ul class="qa-list">
+                        <li>معدل القبول والفرع (علمي/أدبي)</li>
+                        <li>الرسوم الدراسية والمنح</li>
+                        <li>شروط التجسير (من دبلوم لبكالوريوس)</li>
+                        <li>الخطط الدراسية والمساقات</li>
+                        <li>مواعيد وإجراءات التسجيل</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== IT ===== -->
+            <div class="deanery-block" style="border-right-color: #75c04e;">
+                <div class="dhead">
+                    <h4>💻 عمادة تكنولوجيا المعلومات</h4>
+                    <span class="meta">عدد الاستفسارات: 132</span>
+                </div>
+                <div class="dstats">
+                    <span>✅ تم الرد: <strong>119</strong> (90.2%)</span>
+                    <span>⏱ متوسط سرعة الرد: <strong>18 دقيقة</strong></span>
+                    <span>👥 مرشدون نشطون: <strong>4+</strong></span>
+                </div>
+                <div class="mentor-list">
+                    <p style="font-weight:700; margin: 6px 0 4px; color:var(--text);">أبرز المرشدين والسفراء:</p>
+                    <div class="mentor-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الرتبة</th>
+                                    <th>الاسم (الرقم)</th>
+                                    <th>الردود</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>م. أسامة غانم (+972 59-934-7039)</td>
+                                    <td>28</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Saad Daher (+972 59-919-4958)</td>
+                                    <td>24</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Mahmoud Abujadallah (+972 59-256-5584)</td>
+                                    <td>18</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p style="font-weight:700; margin: 8px 0 2px; color:var(--text);">أبرز 5 أسئلة متكررة:</p>
+                    <ul class="qa-list">
+                        <li>معدل القبول والفرع (علمي/أدبي)</li>
+                        <li>سعر الساعة الدراسية</li>
+                        <li>المنح والتخفيضات</li>
+                        <li>مواصفات اللابتوب</li>
+                        <li>التجسير (دبلوم → بكالوريوس)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== Business ===== -->
+            <div class="deanery-block" style="border-right-color: #8b5cf6;">
+                <div class="dhead">
+                    <h4>💰 عمادة إدارة المال والأعمال</h4>
+                    <span class="meta">عدد الاستفسارات: 254</span>
+                </div>
+                <div class="dstats">
+                    <span>✅ تم الرد: <strong>205</strong> (80.7%)</span>
+                    <span>⏱ متوسط سرعة الرد: <strong>3 ساعات و 28 دقيقة</strong></span>
+                    <span>👥 مرشدون نشطون: <strong>3+</strong></span>
+                </div>
+                <div class="mentor-list">
+                    <p style="font-weight:700; margin: 6px 0 4px; color:var(--text);">أبرز المرشدين والسفراء:</p>
+                    <div class="mentor-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الرتبة</th>
+                                    <th>الاسم (الرقم)</th>
+                                    <th>الردود</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Reem Abu Taha (+972 59-556-4880)</td>
+                                    <td>52</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Raghad Miteer (+972 59-460-7345)</td>
+                                    <td>47</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>Sнaiмaа (+970 597 193 127)</td>
+                                    <td>32</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p style="font-weight:700; margin: 8px 0 2px; color:var(--text);">أبرز 5 أسئلة متكررة:</p>
+                    <ul class="qa-list">
+                        <li>الفرق بين التسويق الإلكتروني والرقمي</li>
+                        <li>لغة المحاسبة (عربي أم إنجليزي)</li>
+                        <li>فرص العمل المتاحة</li>
+                        <li>رسوم الساعة الدراسية</li>
+                        <li>كيفية التسجيل والالتحاق</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== Humanities ===== -->
+            <div class="deanery-block" style="border-right-color: #ec4899;">
+                <div class="dhead">
+                    <h4>📡 عمادة العلوم الإنسانية والإعلام</h4>
+                    <span class="meta">عدد الاستفسارات: 53</span>
+                </div>
+                <div class="dstats">
+                    <span>✅ تم الرد: <strong>43</strong> (81.1%)</span>
+                    <span>⏱ متوسط سرعة الرد: <strong>ساعة و 47 دقيقة</strong></span>
+                    <span>👥 مرشدون نشطون: <strong>3</strong></span>
+                </div>
+                <div class="mentor-list">
+                    <p style="font-weight:700; margin: 6px 0 4px; color:var(--text);">أبرز المرشدين والسفراء:</p>
+                    <div class="mentor-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الرتبة</th>
+                                    <th>الاسم (الرقم)</th>
+                                    <th>الردود</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>د. صخر (+972 59-987-1270)</td>
+                                    <td>22</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>أ. محمد صلاح (+972 59-768-7463)</td>
+                                    <td>16</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>آثار مرتجى (+972 59-710-7643)</td>
+                                    <td>14</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p style="font-weight:700; margin: 8px 0 2px; color:var(--text);">أبرز 5 مواضيع مطروحة:</p>
+                    <ul class="qa-list">
+                        <li>التخصصات المتاحة (خدمة اجتماعية، إعلام، علاقات عامة، صناعة محتوى)</li>
+                        <li>التسجيل والقبول</li>
+                        <li>المنح والرسوم</li>
+                        <li>مواعيد الدراسة والتسجيل</li>
+                        <li>الفصل الصيفي وحفلات التخرج</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== Education ===== -->
+            <div class="deanery-block" style="border-right-color: #f59e0b;">
+                <div class="dhead">
+                    <h4>📚 عمادة التربية</h4>
+                    <span class="meta">عدد الاستفسارات: 66</span>
+                </div>
+                <div class="dstats">
+                    <span>✅ تم الرد: <strong>54</strong> (81.8%)</span>
+                    <span>⏱ متوسط سرعة الرد: <strong>ساعة و 49 دقيقة</strong></span>
+                    <span>👥 مرشدون نشطون: <strong>2</strong></span>
+                </div>
+                <div class="mentor-list">
+                    <p style="font-weight:700; margin: 6px 0 4px; color:var(--text);">أبرز المرشدين والسفراء:</p>
+                    <div class="mentor-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الرتبة</th>
+                                    <th>الاسم (الرقم)</th>
+                                    <th>الردود</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>~ayaalnajjar1210 (+972 59-252-6623)</td>
+                                    <td>20</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>~شريهان مرتجى (+972 59-970-0375)</td>
+                                    <td>17</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>~أ. رانيا اسامه حامد طه (+972 59-524-4048)</td>
+                                    <td>13</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p style="font-weight:700; margin: 8px 0 2px; color:var(--text);">أبرز 5 مواضيع مطروحة:</p>
+                    <ul class="qa-list">
+                        <li>طريقة التسجيل والقبول</li>
+                        <li>التخصصات المتاحة (تربية طفل، تعليم أساسي، تربية رياضية، شريعة)</li>
+                        <li>المنح الدراسية ورسوم الساعات</li>
+                        <li>مشاكل رقم الجلوس</li>
+                        <li>التسجيل في الفصل الصيفي</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ===== Professional Diploma ===== -->
+            <div class="deanery-block" style="border-right-color: #6b7280;">
+                <div class="dhead">
+                    <h4>🎓 عمادة الدبلوم المهني والتعليم المستمر</h4>
+                    <span class="meta">عدد الاستفسارات: 50</span>
+                </div>
+                <div class="dstats">
+                    <span>✅ تم الرد: <strong>43</strong> (86.0%)</span>
+                    <span>⏱ متوسط سرعة الرد: <strong>4 ساعات و 40 دقيقة</strong></span>
+                    <span>👥 مرشدون نشطون: <strong>2</strong></span>
+                </div>
+                <div class="mentor-list">
+                    <p style="font-weight:700; margin: 6px 0 4px; color:var(--text);">أبرز المرشدين والسفراء:</p>
+                    <div class="mentor-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الرتبة</th>
+                                    <th>الاسم (الرقم)</th>
+                                    <th>الردود</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Mahmoud Khalil</td>
+                                    <td>25</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Reem Alamassi (+972 59-770-0308)</td>
+                                    <td>20</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>~عدي مازن (+972 59-519-4826)</td>
+                                    <td>5</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <p style="font-weight:700; margin: 8px 0 2px; color:var(--text);">أبرز 5 مواضيع مطروحة:</p>
+                    <ul class="qa-list">
+                        <li>ماهية الدبلوم المهني</li>
+                        <li>شروط الالتحاق (هل يشترط توجيهي؟)</li>
+                        <li>التخصصات المتاحة</li>
+                        <li>الرسوم والمنح</li>
+                        <li>كيفية التسجيل</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        5. COMPARISON TABLE
+        ============================================================ -->
+        <section class="section" id="comparison">
+            <div class="section-header">
+                <span class="num">٥</span>
+                <h2>جدول مقارنة العمادات <span class="highlight">(بناءً على الإحصائيات)</span></h2>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>العمادة</th>
+                            <th>الاستفسارات</th>
+                            <th>الردود</th>
+                            <th>نسبة الرد</th>
+                            <th>التقييم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>التمريض</td>
+                            <td>211</td>
+                            <td>182</td>
+                            <td>86.3%</td>
+                            <td class="stars">⭐⭐⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>الهندسة</td>
+                            <td>278</td>
+                            <td>209</td>
+                            <td>75.2%</td>
+                            <td class="stars">⭐⭐⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>تكنولوجيا المعلومات</td>
+                            <td>132</td>
+                            <td>119</td>
+                            <td>90.2%</td>
+                            <td class="stars">⭐⭐⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>إدارة المال والأعمال</td>
+                            <td>254</td>
+                            <td>205</td>
+                            <td>80.7%</td>
+                            <td class="stars">⭐⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>الإنسانية والإعلام</td>
+                            <td>53</td>
+                            <td>43</td>
+                            <td>81.1%</td>
+                            <td class="stars">⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>التربية</td>
+                            <td>66</td>
+                            <td>54</td>
+                            <td>81.8%</td>
+                            <td class="stars">⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td>الدبلوم المهني</td>
+                            <td>50</td>
+                            <td>43</td>
+                            <td>86.0%</td>
+                            <td class="stars">⭐⭐⭐</td>
+                        </tr>
+                        <tr>
+                            <td><strong>المجموع</strong></td>
+                            <td><strong>1,044</strong></td>
+                            <td><strong>855</strong></td>
+                            <td><strong>81.9%</strong></td>
+                            <td>—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-top:6px;">* التقييم مبني على نسبة الرد وسرعة
+                الاستجابة وحجم النشاط.</p>
+        </section>
+
+        <!-- ============================================================
+        6. MOST FREQUENT QUESTIONS
+        ============================================================ -->
+        <section class="section" id="faq">
+            <div class="section-header">
+                <span class="num">٦</span>
+                <h2>الأسئلة الأكثر تكراراً <span class="highlight">(عبر جميع العمادات)</span></h2>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الموضوع / السؤال</th>
+                            <th>عدد المرات (تقديري)</th>
+                            <th>العمادات الأكثر طرحاً</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>التسجيل والقبول (كيف أسجل؟ مواعيد التسجيل)</td>
+                            <td>~160</td>
+                            <td>جميع العمادات</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>الرسوم الدراسية وسعر الساعة</td>
+                            <td>~120</td>
+                            <td>التمريض، الهندسة، تكنولوجيا المعلومات، الأعمال</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>المنح الدراسية وشروطها</td>
+                            <td>~90</td>
+                            <td>التمريض، الهندسة، الأعمال</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>التخصصات المتاحة والفرق بينها</td>
+                            <td>~80</td>
+                            <td>التمريض، تكنولوجيا المعلومات، الإنسانية</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>التجسير (من دبلوم لبكالوريوس)</td>
+                            <td>~55</td>
+                            <td>التمريض، الهندسة، تكنولوجيا المعلومات</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>نظام الدراسة (وجاهي أم إلكتروني)</td>
+                            <td>~45</td>
+                            <td>جميع العمادات</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>الخطط الدراسية والمساقات</td>
+                            <td>~40</td>
+                            <td>الهندسة، تكنولوجيا المعلومات</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>مواصفات اللابتوب المطلوبة</td>
+                            <td>~30</td>
+                            <td>تكنولوجيا المعلومات، الهندسة، الإعلام</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">* الأرقام تقديرية مبنية على تجميع
+                البيانات من الإحصائيات المتاحة لكل عمادة.</p>
+        </section>
+
+        <!-- ============================================================
+        7. PUBLIC vs PRIVATE REPLIES
+        ============================================================ -->
+        <section class="section" id="private-note">
+            <div class="section-header">
+                <span class="num">٧</span>
+                <h2>ملاحظة مهمة: الردود العلنية مقابل الردود الفعلية</h2>
+            </div>
+            <div class="note-box">
+                <p style="margin-bottom: 6px;"><strong>📌 الأرقام المذكورة أعلاه للردود العلنية فقط (التي تظهر في
+                        المجموعات العامة).</strong></p>
+                <p style="margin-bottom: 4px;"><strong>الردود عبر الخاص:</strong> تشكل <strong>30–50%</strong> من إجمالي
+                    الردود — تتم عندما يطلب المرشد من الطالب التواصل خاصاً لحل مشكلته، ولا تظهر في سجلات المجموعة.</p>
+            </div>
+
+            <h4 style="margin-top:12px; font-weight:800; color:var(--primary);">العوامل المؤثرة:</h4>
+            <ul style="padding-right: 20px; margin-bottom: 14px; color:var(--text-light);">
+                <li><strong style="color:var(--text);">الردود المتأخرة:</strong> تأتي بعد ساعات أو أيام في أوقات الذروة.
+                </li>
+                <li><strong style="color:var(--text);">الردود الجماعية:</strong> رد واحد يجيب على 3–5 أسئلة متشابهة.
+                </li>
+                <li><strong style="color:var(--text);">الإشارات إلى ردود سابقة:</strong> "تم الرد سابقاً" أو "انظر
+                    أعلاه".</li>
+                <li><strong style="color:var(--text);">ردود من طلاب آخرين:</strong> يخفف العبء عن المرشدين.</li>
+            </ul>
+
+            <h4 style="font-weight:800; color:var(--primary);">معدل الرد الفعلي التقديري (بما في ذلك الخاص):</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>العمادة</th>
+                            <th>معدل الرد العلني</th>
+                            <th>+ الردود الخاصة</th>
+                            <th>المعدل الفعلي التقديري</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>التمريض</td>
+                            <td>86.3%</td>
+                            <td>+5–10%</td>
+                            <td><strong>~91–96%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>الهندسة</td>
+                            <td>75.2%</td>
+                            <td>+10–15%</td>
+                            <td><strong>~85–90%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>تكنولوجيا المعلومات</td>
+                            <td>90.2%</td>
+                            <td>+5–8%</td>
+                            <td><strong>~95–98%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>إدارة المال والأعمال</td>
+                            <td>80.7%</td>
+                            <td>+8–12%</td>
+                            <td><strong>~88–92%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>الإنسانية والإعلام</td>
+                            <td>81.1%</td>
+                            <td>+8–10%</td>
+                            <td><strong>~89–91%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>التربية</td>
+                            <td>81.8%</td>
+                            <td>+5–10%</td>
+                            <td><strong>~86–92%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>الدبلوم المهني</td>
+                            <td>86.0%</td>
+                            <td>+5–8%</td>
+                            <td><strong>~91–94%</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        8. RECOMMENDATIONS
+        ============================================================ -->
+        <section class="section" id="recommendations">
+            <div class="section-header">
+                <span class="num">٨</span>
+                <h2>التحليل الشامل والتوصيات</h2>
+            </div>
+
+            <h3 style="font-weight:800; color:var(--primary);">8.1 نقاط القوة</h3>
+            <ul style="padding-right:20px; margin-bottom:18px; color:var(--text-light);">
+                <li><strong style="color:var(--text);">تغطية شاملة:</strong> 7 عمادات + مجموعة عامة مع مرشدين نشطين.
+                </li>
+                <li><strong style="color:var(--text);">استجابة فورية:</strong> البوت يعمل 24/7 دون تدخل بشري، والإرشاد
+                    البشري سريع في معظم العمادات.</li>
+                <li><strong style="color:var(--text);">معدل تسليم تقني ممتاز:</strong> 99.9%.</li>
+                <li><strong style="color:var(--text);">تفاعل حقيقي:</strong> تجاوز عدد الرسائل المستجابة 7,500 رسالة،
+                    مما يعكس الإقبال الكبير على النظام الإلكتروني.</li>
+                <li><strong style="color:var(--text);">فريق إرشاد قوي:</strong> خاصة في عمادة التمريض وتكنولوجيا
+                    المعلومات.</li>
+            </ul>
+
+            <h3 style="font-weight:800; color:var(--primary);">8.2 التحديات والفرص</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التحدي</th>
+                            <th>الإجراء المقترح</th>
+                            <th>الأولوية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>عدم تفاعل جزء من المستخدمين فوراً مع البوت</td>
+                            <td>إرسال رسالة تذكير بعد 24 ساعة</td>
+                            <td><span class="badge badge-high">عالية</span></td>
+                        </tr>
+                        <tr>
+                            <td>قلة الردود في بعض العمادات (الهندسة 75.2%)</td>
+                            <td>تعزيز فريق الإرشاد وتوزيع المهام</td>
+                            <td><span class="badge badge-medium">متوسطة</span></td>
+                        </tr>
+                        <tr>
+                            <td>تكرار نفس الأسئلة</td>
+                            <td>إضافة قسم "الأسئلة الشائعة" في البوت وتثبيت رسالة FAQ</td>
+                            <td><span class="badge badge-high">عالية</span></td>
+                        </tr>
+                        <tr>
+                            <td>بطء الرد في بعض العمادات (الدبلوم المهني 4 ساعات)</td>
+                            <td>توزيع المرشدين النشطين على فترات زمنية أوسع</td>
+                            <td><span class="badge badge-high">عالية</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top:24px; font-weight:800; color:var(--primary);">8.3 التوصيات</h3>
+            <div class="rec-grid">
+                <div class="rec-card">
+                    <div class="rtitle">📌 التوصية 1: إضافة زر "الأسئلة الشائعة"</div>
+                    <p class="rdesc">إضافة خيار في القائمة الرئيسية يحتوي على إجابات لأكثر 10 أسئلة تكراراً.</p>
+                    <span class="rpriority high">عالية</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted); margin-right:12px;">⏱ أسبوع واحد</span>
+                    <p class="rimpact">📈 التأثير المتوقع: تقليل الأسئلة المتكررة بنسبة 30–40%</p>
+                </div>
+                <div class="rec-card">
+                    <div class="rtitle">📌 التوصية 2: تفعيل رسائل التذكير</div>
+                    <p class="rdesc">إرسال رسالة تذكير تلقائية بعد 24 ساعة لمن فتح الرسالة ولم يتفاعل.</p>
+                    <span class="rpriority high">عالية</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted); margin-right:12px;">⏱ أسبوعان</span>
+                    <p class="rimpact">📈 التأثير المتوقع: زيادة معدل الاستجابة بنسبة 5–10%</p>
+                </div>
+                <div class="rec-card">
+                    <div class="rtitle">📌 التوصية 3: تحفيز المرشدين والسفراء</div>
+                    <p class="rdesc">تحفيز المرشدين والسفراء من كل عمادة بالرد على الأسئلة المتواجدة في هذه المجموعات
+                        واتسآب، مع تقديم مكافأة شهرية للأكثر تفاعلاً.</p>
+                    <span class="rpriority medium">متوسطة</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted); margin-right:12px;">⏱ فوري</span>
+                    <p class="rimpact">📈 التأثير المتوقع: تحسين جودة وكمية الردود في العمادات الأقل نشاطاً</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        9. CONCLUSION (محسّن)
+        ============================================================ -->
+        <section class="section" id="conclusion">
+            <div class="section-header">
+                <span class="num">٩</span>
+                <h2>الخلاصة النهائية</h2>
+            </div>
+
+            <div class="conclusion-box">
+                <div class="rating-grid">
+                    <div class="item">
+                        <span class="label">الأداء التقني</span>
+                        <span class="stars">⭐⭐⭐⭐⭐</span>
+                        <span class="note">ممتاز</span>
+                    </div>
+                    <div class="item">
+                        <span class="label">التفاعل الطلابي</span>
+                        <span class="stars">⭐⭐⭐⭐⭐</span>
+                        <span class="note">ممتاز</span>
+                    </div>
+                    <div class="item">
+                        <span class="label">تغطية التخصصات</span>
+                        <span class="stars">⭐⭐⭐⭐⭐</span>
+                        <span class="note">شاملة</span>
+                    </div>
+                    <div class="item">
+                        <span class="label">سرعة الاستجابة</span>
+                        <span class="stars">⭐⭐⭐</span>
+                        <span class="note">جيد</span>
+                    </div>
+                    <div class="item">
+                        <span class="label">دقة التوجيه</span>
+                        <span class="stars">⭐⭐⭐⭐</span>
+                        <span class="note">جيدة</span>
+                    </div>
+                    <div class="item">
+                        <span class="label">سهولة الاستخدام</span>
+                        <span class="stars">⭐⭐⭐⭐</span>
+                        <span class="note">جيدة، تحتاج تحسين في الهندسة</span>
+                    </div>
+                </div>
+                <p style="font-size:1.05rem; margin-bottom:0; color:var(--text);">
+                    <strong style="color:var(--primary);">الخلاصة:</strong> البوت يحقق أهدافه بنجاح، مع إمكانيات كبيرة
+                    للتحسين في تجربة المستخدم وتوزيع الموارد بين العمادات.
+                    الاستمرار في تطوير البوت سيؤدي إلى زيادة معدلات الاستجابة والرضا العام.
+                    التوصيات الأربع المذكورة أعلاه تمثل خريطة طريق واضحة للتحسين في الفترة القادمة.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        10. METHODOLOGY (تم التعديل حسب الطلب)
+        ============================================================ -->
+        <section class="section" id="methodology">
+            <div class="section-header">
+                <span class="num">١٠</span>
+                <h2>البيانات الأولية والمنهجية</h2>
+            </div>
+
+            <h4 style="font-weight:800; color:var(--primary);">مصدر البيانات:</h4>
+            <ul style="padding-right:20px; margin-bottom:14px; color:var(--text-light);">
+                <li>ملفات المحادثات النصية (WhatsApp Chat Export) لـ 7 عمادات + مجموعة عامة (تم تحليلها يدوياً).</li>
+                <li>بيانات الـ API من البوت (رسائل مرسلة، مستلمة، مستجابة).</li>
+            </ul>
+
+            <h4 style="font-weight:800; color:var(--primary);">منهجية التحليل:</h4>
+            <ul style="padding-right:20px; margin-bottom:14px; color:var(--text-light);">
+                <li><strong style="color:var(--text);">التحليل الكمي:</strong> عد الاستفسارات الفريدة والردود الفعلية،
+                    مع استبعاد رسائل النظام والإضافات والإزالات.</li>
+                <li><strong style="color:var(--text);">التحليل النوعي:</strong> تصنيف الأسئلة حسب الموضوع واستخراج
+                    التكرارات.</li>
+                <li><strong style="color:var(--text);">تقدير الردود الخاصة:</strong> بناءً على طبيعة العمل، تم إضافة
+                    نسبة 5–15% للردود التي تتم عبر الخاص.</li>
+            </ul>
+
+            <h4 style="font-weight:800; color:var(--primary);">القيود:</h4>
+            <ul style="padding-right:20px; color:var(--text-light);">
+                <li>ملاحظة: مؤشرات الأداء الحقيقية (معدل التحويل، معدل الرضا، معدل الاحتفاظ) غير متوفرة حالياً.</li>
+            </ul>
+
+            <div
+                style="margin-top:18px; padding:14px 20px; background:var(--card-bg); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-radius:var(--radius-sm); border-right:4px solid var(--primary); border:1px solid var(--border-color); font-size:0.9rem; color:var(--text-muted);">
+                <strong style="color:var(--text);">📅 تاريخ التقرير:</strong> 8 أغسطس 2026 &nbsp;|&nbsp; <strong
+                    style="color:var(--text);">إعداد:</strong> م.محمود الشيخ خليل
+            </div>
+        </section>
+
+    </div>
+    <!-- /report-content -->
+
+    <!-- ================================================================
+    FOOTER
+    ================================================================ -->
+    <footer class="report-footer">
+        <p style="font-weight:700;">وحدة الاستقطاب والعناية بالطلبة</p>
+        <p style="font-size:0.95rem;">الكلية الجامعية للعلوم التطبيقية &mdash; UCAS</p>
+        <p class="footer-copy" style="margin-top:6px;">© 2026 وحدة الاستقطاب والعناية بالطلبة &bull; فريق المبرمجين</p>
+    </footer>
+
+    <!-- ================================================================
+    BACK TO TOP
+    ================================================================ -->
+    <a href="#top" class="back-to-top" id="backToTop" aria-label="العودة للأعلى">
+        <i class="fa-solid fa-arrow-up"></i>
+    </a>
+
+    <!-- ================================================================
+    SCRIPTS
+    ================================================================ -->
+    <script>
+        // ===== شاشة التحميل =====
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 700);
+        });
+
+        // ===== Dark Mode =====
+        const darkToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        darkToggle.addEventListener('click', () => {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                body.removeAttribute('data-theme');
+                darkToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                darkToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+            }
+        });
+
+        // ===== Scroll Progress =====
+        const progress = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const percent = (scrollTop / docHeight) * 100;
+            progress.style.width = percent + '%';
+        });
+
+        // ===== Back to Top =====
+        const backBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 350) {
+                backBtn.classList.add('visible');
+            } else {
+                backBtn.classList.remove('visible');
+            }
+        });
+
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ===== Charts =====
+        document.addEventListener('DOMContentLoaded', function () {
+            const textColor = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#1a1a2e';
+            const mutedColor = getComputedStyle(document.body).getPropertyValue('--text-muted').trim() || '#7a8295';
+
+            // ===== Daily Chart =====
+            const ctx1 = document.getElementById('dailyChart').getContext('2d');
+            const labels1 = ['23/7', '24/7', '25/7', '26/7', '27/7', '28/7', '29/7', '30/7', '31/7', '1/8', '2/8', '3/8',
+                '4/8', '5/8'
+            ];
+            const data1 = [450, 520, 200, 780, 1200, 650, 850, 950, 1600, 800, 720, 620, 530, 480];
+
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: labels1,
+                    datasets: [{
+                        label: 'عدد الرسائل اليومية',
+                        data: data1,
+                        backgroundColor: 'rgba(0, 91, 170, 0.15)',
+                        borderColor: '#005baa',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#62bb46',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        tension: 0.3,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: { family: 'Cairo', size: 14, weight: 'bold' },
+                                color: textColor
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Cairo', size: 11 },
+                                color: mutedColor
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                font: { family: 'Cairo', size: 11 },
+                                color: mutedColor
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // ===== Pie Chart =====
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: ['الهندسة', 'إدارة الأعمال', 'التمريض', 'تكنولوجيا المعلومات', 'التربية', 'الإنسانية',
+                        'الدبلوم المهني'
+                    ],
+                    datasets: [{
+                        data: [278, 254, 211, 132, 66, 53, 50],
+                        backgroundColor: ['#f5a623', '#8b5cf6', '#0f62ac', '#75c04e', '#f59e0b', '#ec4899',
+                            '#6b7280'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Cairo', size: 12 },
+                                color: textColor,
+                                padding: 12
+                            }
+                        }
+                    }
+                }
+            });
+
+            // ===== Bar Chart =====
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['الهندسة', 'إدارة الأعمال', 'التمريض', 'تكنولوجيا المعلومات', 'التربية', 'الإنسانية',
+                        'الدبلوم المهني'
+                    ],
+                    datasets: [{
+                        label: 'عدد الاستفسارات',
+                        data: [278, 254, 211, 132, 66, 53, 50],
+                        backgroundColor: ['#f5a623', '#8b5cf6', '#0f62ac', '#75c04e', '#f59e0b', '#ec4899',
+                            '#6b7280'
+                        ],
+                        borderRadius: 6,
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Cairo', size: 11 },
+                                color: mutedColor
+                            }
+                        },
+                        y: {
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: {
+                                font: { family: 'Cairo', size: 11 },
+                                color: mutedColor,
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>
